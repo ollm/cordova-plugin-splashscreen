@@ -342,6 +342,7 @@ public class SplashScreen extends CordovaPlugin {
                     }
                 }
                 String navigationBarColor = preferences.getString("SplashNavigationBarBackgroundColor", "#000000");
+                Boolean navigationBarLight = preferences.getBoolean("SplashNavigationBarLight", false);
 
                 if (navigationBarColor != null && !navigationBarColor.isEmpty() && Build.VERSION.SDK_INT >= 19) {
 
@@ -354,6 +355,20 @@ public class SplashScreen extends CordovaPlugin {
                         // this should not happen, only in case Android removes this method in a version > 21
                         LOG.w("SplashScreen StatusBarColor", "Method window.setNavigationBarColor not found for SDK level " + Build.VERSION.SDK_INT);
                     }
+
+                    int uiOptions = splashWindow.getDecorView().getSystemUiVisibility();
+
+                    // 0x80000000 FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS
+                    // 0x00000010 SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+
+                    uiOptions = uiOptions | 0x80000000;
+
+                    if(Build.VERSION.SDK_INT >= 26 && navigationBarLight)
+                        uiOptions = uiOptions | 0x00000010;
+                    else
+                        uiOptions = uiOptions & ~0x00000010;
+
+                    splashWindow.getDecorView().setSystemUiVisibility(uiOptions); 
                 }
                    
                 splashDialog.setContentView(splashImageView);
