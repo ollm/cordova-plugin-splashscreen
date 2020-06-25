@@ -322,12 +322,12 @@ public class SplashScreen extends CordovaPlugin {
                 // check to see if the splash screen should be full screen
                 if ((cordova.getActivity().getWindow().getAttributes().flags & WindowManager.LayoutParams.FLAG_FULLSCREEN)
                         == WindowManager.LayoutParams.FLAG_FULLSCREEN) {
-                    splashWindow.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                    splashDialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                             WindowManager.LayoutParams.FLAG_FULLSCREEN);
                 }
 
-                // Status bar color just like cordova-plugin.statusbar
-                String statusBarColor = preferences.getString("StatusBarBackgroundColor", "#000000");
+                // Inspirated in https://github.com/apache/cordova-plugin-splashscreen/pull/124/files
+                String statusBarColor = preferences.getString("SplashStatusBarBackgroundColor", "#000000");
 
                 if (statusBarColor != null && !statusBarColor.isEmpty() && Build.VERSION.SDK_INT >= 19) {
 
@@ -335,10 +335,24 @@ public class SplashScreen extends CordovaPlugin {
                     splashWindow.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
                     try {
                         // Using reflection makes sure any 5.0+ device will work without having to compile with SDK level 21
-                        splashWindow.getClass().getDeclaredMethod("setStatusBarColor", int.class).invoke(splashWindow, Color.parseColor(statusBarColor));
+                        splashWindow.getClass().getMethod("setStatusBarColor", int.class).invoke(splashWindow, Color.parseColor(statusBarColor));
                     } catch (Exception ignore) {
                         // this should not happen, only in case Android removes this method in a version > 21
                         LOG.w("SplashScreen StatusBarColor", "Method window.setStatusBarColor not found for SDK level " + Build.VERSION.SDK_INT);
+                    }
+                }
+                String navigationBarColor = preferences.getString("SplashNavigationBarBackgroundColor", "#000000");
+
+                if (navigationBarColor != null && !navigationBarColor.isEmpty() && Build.VERSION.SDK_INT >= 19) {
+
+                    splashWindow.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+                    splashWindow.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+                    try {
+                        // Using reflection makes sure any 5.0+ device will work without having to compile with SDK level 21
+                        splashWindow.getClass().getMethod("setNavigationBarColor", int.class).invoke(splashWindow, Color.parseColor(navigationBarColor));
+                    } catch (Exception ignore) {
+                        // this should not happen, only in case Android removes this method in a version > 21
+                        LOG.w("SplashScreen StatusBarColor", "Method window.setNavigationBarColor not found for SDK level " + Build.VERSION.SDK_INT);
                     }
                 }
                    
